@@ -29,6 +29,7 @@ export default function Home() {
             {/* Headline */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-navy mb-6 leading-tight">
               Events That Won&apos;t{' '}
+              <br />
               <span className="text-primary">Break the Bank</span>
             </h1>
 
