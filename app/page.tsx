@@ -36,7 +36,7 @@ export default function Home() {
             {/* Subheadline */}
             <p className="text-lg sm:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
               Discover affordable experiences in your area. From free concerts to budget-friendly 
-              festivals, find your next adventure without emptying your wallet.
+              yardsales, swap meets, , find your next adventure without emptying your wallet.
             </p>
 
             {/* CTA Buttons */}
