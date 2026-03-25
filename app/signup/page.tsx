@@ -159,11 +159,11 @@ export default function SignupPage() {
 
             <p className="text-xs text-gray-400 text-center">
               By creating an account, you agree to our{' '}
-              <Link href="/terms" className="text-primary hover:text-primary-dark">
+              <Link href="/terms-of-service" className="text-primary hover:text-primary-dark">
                 Terms of Service
               </Link>{' '}
               and{' '}
-              <Link href="/privacy" className="text-primary hover:text-primary-dark">
+              <Link href="/privacy-policy" className="text-primary hover:text-primary-dark">
                 Privacy Policy
               </Link>
             </p>

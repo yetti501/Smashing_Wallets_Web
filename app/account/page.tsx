@@ -151,7 +151,7 @@ export default function AccountPage() {
 
           <div className="divide-y divide-gray-100">
             <Link
-              href="/account/password"
+              href="/forgot-password"
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -168,7 +168,7 @@ export default function AccountPage() {
             </Link>
 
             <Link
-              href="/support"
+              href="/help-support"
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -185,7 +185,7 @@ export default function AccountPage() {
             </Link>
 
             <Link
-              href="/terms"
+              href="/terms-of-service"
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">
@@ -202,7 +202,7 @@ export default function AccountPage() {
             </Link>
 
             <Link
-              href="/privacy"
+              href="/privacy-policy"
               className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors"
             >
               <div className="flex items-center gap-3">

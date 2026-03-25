@@ -158,13 +158,13 @@ export default function Home() {
               <span className="font-semibold text-navy">Smashing Wallets</span>
             </div>
             <div className="flex gap-6 text-sm text-gray-500">
-              <Link href="/terms" className="hover:text-primary transition-colors">
+              <Link href="/terms-of-service" className="hover:text-primary transition-colors">
                 Terms of Service
               </Link>
-              <Link href="/privacy" className="hover:text-primary transition-colors">
+              <Link href="/privacy-policy" className="hover:text-primary transition-colors">
                 Privacy Policy
               </Link>
-              <Link href="/support" className="hover:text-primary transition-colors">
+              <Link href="/help-support" className="hover:text-primary transition-colors">
                 Help & Support
               </Link>
             </div>
