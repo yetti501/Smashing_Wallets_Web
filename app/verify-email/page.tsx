@@ -1,82 +1,147 @@
-"use client";
+'use client';
 
-import { useSearchParams } from "next/navigation";
-import { useEffect, Suspense } from "react";
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState, Suspense, useCallback } from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { Client, Account } from 'appwrite';
+
+type Status = 'verifying' | 'success' | 'error';
 
 function VerifyEmailContent() {
   const searchParams = useSearchParams();
-  const userId = searchParams.get("userId") ?? "";
-  const secret = searchParams.get("secret") ?? "";
+  const userId = searchParams.get('userId') ?? '';
+  const secret = searchParams.get('secret') ?? '';
   const deepLink = `smashingwallets://verifyEmail?userId=${encodeURIComponent(userId)}&secret=${encodeURIComponent(secret)}`;
 
-  useEffect(() => {
-    if (userId && secret) {
+  const [status, setStatus] = useState<Status>('verifying');
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const verify = useCallback(async () => {
+    if (!userId || !secret) {
+      setErrorMessage('Invalid verification link. The link may be incomplete or malformed.');
+      setStatus('error');
+      return;
+    }
+
+    try {
+      const client = new Client()
+        .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || 'https://nyc.cloud.appwrite.io/v1')
+        .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '68e5da9800045446cea7');
+      const account = new Account(client);
+
+      await account.updateVerification(userId, secret);
+      setStatus('success');
+
+      // Auto-attempt deep link on success
       window.location.href = deepLink;
+    } catch (err: unknown) {
+      const message =
+        err instanceof Error ? err.message : 'An unexpected error occurred.';
+
+      if (message.includes('expired') || message.includes('Invalid token')) {
+        setErrorMessage('This verification link has expired. Please request a new one from the app.');
+      } else if (message.includes('already')) {
+        setErrorMessage('Your email has already been verified. You can close this page.');
+      } else {
+        setErrorMessage(message);
+      }
+      setStatus('error');
     }
   }, [userId, secret, deepLink]);
 
+  useEffect(() => {
+    verify();
+  }, [verify]);
+
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        backgroundColor: "#f8f9fa",
-        padding: "1rem",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-      }}
-    >
-      <div
-        style={{
-          backgroundColor: "#fff",
-          borderRadius: "16px",
-          boxShadow: "0 4px 24px rgba(0,0,0,0.08)",
-          padding: "2.5rem 2rem",
-          maxWidth: "420px",
-          width: "100%",
-          textAlign: "center",
-        }}
-      >
-        <h1
-          style={{
-            color: "#1E3A5F",
-            fontSize: "1.5rem",
-            fontWeight: 700,
-            marginBottom: "0.5rem",
-          }}
-        >
-          Verify Your Email
-        </h1>
-        <p style={{ color: "#6B7280", fontSize: "0.95rem", marginBottom: "1.5rem" }}>
-          Tap the button below to open Smashing Wallets and verify your email address.
-        </p>
-        <a
-          href={deepLink}
-          style={{
-            display: "inline-block",
-            backgroundColor: "#FF5747",
-            color: "#fff",
-            fontWeight: 600,
-            fontSize: "1rem",
-            padding: "0.85rem 2rem",
-            borderRadius: "10px",
-            textDecoration: "none",
-            width: "100%",
-            boxSizing: "border-box",
-          }}
-        >
-          Open App
-        </a>
-        <p
-          style={{
-            color: "#6B7280",
-            fontSize: "0.8rem",
-            marginTop: "1.25rem",
-          }}
-        >
-          If the app doesn&apos;t open, make sure Smashing Wallets is installed on your device.
-        </p>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <Link href="/" className="inline-block">
+            <Image
+              src="/logo.png"
+              alt="Smashing Wallets"
+              width={80}
+              height={80}
+              className="mx-auto mb-4"
+            />
+          </Link>
+        </div>
+
+        {/* Card */}
+        <div className="bg-white rounded-2xl shadow-xl shadow-gray-100/50 p-8 text-center">
+          {/* Verifying State */}
+          {status === 'verifying' && (
+            <>
+              <div className="flex justify-center mb-5">
+                <div className="animate-spin h-12 w-12 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+              <h1 className="text-xl font-bold text-navy mb-2">Verifying your email...</h1>
+              <p className="text-gray-500 text-sm">
+                Please wait while we confirm your email address.
+              </p>
+            </>
+          )}
+
+          {/* Success State */}
+          {status === 'success' && (
+            <>
+              <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-8 h-8 text-green-500"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                </svg>
+              </div>
+              <h1 className="text-xl font-bold text-navy mb-2">Email Verified!</h1>
+              <p className="text-gray-500 text-sm mb-6">
+                Your email address has been successfully verified.
+              </p>
+              <a
+                href={deepLink}
+                className="block w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-primary/25 text-center"
+              >
+                Open App
+              </a>
+              <p className="text-gray-400 text-xs mt-4">
+                On a computer? You can close this tab and return to the app on your device.
+              </p>
+            </>
+          )}
+
+          {/* Error State */}
+          {status === 'error' && (
+            <>
+              <div className="w-16 h-16 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-5">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                  className="w-8 h-8 text-red-500"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9 3.75h.008v.008H12v-.008Z" />
+                </svg>
+              </div>
+              <h1 className="text-xl font-bold text-navy mb-2">Verification Failed</h1>
+              <p className="text-gray-500 text-sm mb-6">{errorMessage}</p>
+              <Link
+                href="/"
+                className="block w-full py-3 px-4 border-2 border-gray-200 text-navy font-semibold rounded-xl hover:bg-gray-50 transition-colors text-center"
+              >
+                Go to Homepage
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
