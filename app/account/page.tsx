@@ -1,13 +1,15 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
+import { account } from '@/lib/appwrite';
 
 export default function AccountPage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const [verifyStatus, setVerifyStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -84,18 +86,51 @@ export default function AccountPage() {
             </div>
 
             {/* Email */}
-            <div className="flex items-center justify-between p-4 hover:bg-gray-50 transition-colors">
-              <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="font-medium text-navy">{user.email}</p>
+            <div className="p-4 hover:bg-gray-50 transition-colors">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
+                  <p className="font-medium text-navy">{user.email}</p>
+                </div>
+                <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  user.emailVerification
+                    ? 'bg-green-100 text-green-700'
+                    : 'bg-orange-100 text-orange-700'
+                }`}>
+                  {user.emailVerification ? 'Verified' : 'Unverified'}
+                </span>
               </div>
-              <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                user.emailVerification 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-orange-100 text-orange-700'
-              }`}>
-                {user.emailVerification ? 'Verified' : 'Unverified'}
-              </span>
+              {!user.emailVerification && (
+                <div className="mt-3">
+                  {verifyStatus === 'sent' ? (
+                    <p className="text-xs text-green-600 font-medium">
+                      Verification email sent! Check your inbox.
+                    </p>
+                  ) : verifyStatus === 'error' ? (
+                    <p className="text-xs text-red-600 font-medium">
+                      Failed to send. Please try again.
+                    </p>
+                  ) : (
+                    <button
+                      onClick={async () => {
+                        setVerifyStatus('sending');
+                        try {
+                          await account.createVerification(
+                            `${window.location.origin}/verify-email`
+                          );
+                          setVerifyStatus('sent');
+                        } catch {
+                          setVerifyStatus('error');
+                        }
+                      }}
+                      disabled={verifyStatus === 'sending'}
+                      className="text-xs text-primary hover:text-primary-dark font-medium transition-colors disabled:opacity-50"
+                    >
+                      {verifyStatus === 'sending' ? 'Sending...' : 'Send verification email'}
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Phone */}
