@@ -12,8 +12,6 @@ function VerifyEmailContent() {
   const searchParams = useSearchParams();
   const userId = searchParams.get('userId') ?? '';
   const secret = searchParams.get('secret') ?? '';
-  const deepLink = `smashingwallets://verifyEmail?userId=${encodeURIComponent(userId)}&secret=${encodeURIComponent(secret)}`;
-
   const [status, setStatus] = useState<Status>('verifying');
   const [errorMessage, setErrorMessage] = useState('');
 
@@ -27,9 +25,6 @@ function VerifyEmailContent() {
     try {
       await account.updateVerification(userId, secret);
       setStatus('success');
-
-      // Auto-attempt deep link on success
-      window.location.href = deepLink;
     } catch (err: unknown) {
       const message =
         err instanceof Error ? err.message : 'An unexpected error occurred.';
@@ -43,7 +38,7 @@ function VerifyEmailContent() {
       }
       setStatus('error');
     }
-  }, [userId, secret, deepLink]);
+  }, [userId, secret]);
 
   useEffect(() => {
     verify();
@@ -99,15 +94,12 @@ function VerifyEmailContent() {
               <p className="text-gray-500 text-sm mb-6">
                 Your email address has been successfully verified. You can now create event listings.
               </p>
-              <a
-                href={deepLink}
+              <Link
+                href="/account"
                 className="block w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all hover:shadow-lg hover:shadow-primary/25 text-center"
               >
-                Open App
-              </a>
-              <p className="text-gray-400 text-xs mt-4">
-                You can close this tab and return to the Smashing Wallets app.
-              </p>
+                Go to Profile
+              </Link>
             </>
           )}
 
