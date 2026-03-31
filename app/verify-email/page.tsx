@@ -19,7 +19,7 @@ function VerifyEmailContent() {
 
   const verify = useCallback(async () => {
     if (!userId || !secret) {
-      setErrorMessage('Invalid verification link. The link may be incomplete or malformed.');
+      setErrorMessage('Invalid verification link. Please check your email and try again.');
       setStatus('error');
       return;
     }
@@ -35,9 +35,9 @@ function VerifyEmailContent() {
         err instanceof Error ? err.message : 'An unexpected error occurred.';
 
       if (message.includes('expired') || message.includes('Invalid token')) {
-        setErrorMessage('This verification link has expired. Please request a new one from the app.');
-      } else if (message.includes('already')) {
-        setErrorMessage('Your email has already been verified. You can close this page.');
+        setErrorMessage('This verification link has expired. Please request a new one from your profile in the app.');
+      } else if (message.includes('already') || message.includes('used')) {
+        setErrorMessage('This link has already been used. Your email may already be verified.');
       } else {
         setErrorMessage(message);
       }
@@ -97,7 +97,7 @@ function VerifyEmailContent() {
               </div>
               <h1 className="text-xl font-bold text-navy mb-2">Email Verified!</h1>
               <p className="text-gray-500 text-sm mb-6">
-                Your email address has been successfully verified.
+                Your email address has been successfully verified. You can now create event listings.
               </p>
               <a
                 href={deepLink}
@@ -106,7 +106,7 @@ function VerifyEmailContent() {
                 Open App
               </a>
               <p className="text-gray-400 text-xs mt-4">
-                On a computer? You can close this tab and return to the app on your device.
+                You can close this tab and return to the Smashing Wallets app.
               </p>
             </>
           )}
@@ -132,7 +132,7 @@ function VerifyEmailContent() {
                 href="/"
                 className="block w-full py-3 px-4 border-2 border-gray-200 text-navy font-semibold rounded-xl hover:bg-gray-50 transition-colors text-center"
               >
-                Go to Homepage
+                Go Home
               </Link>
             </>
           )}
