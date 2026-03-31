@@ -4,7 +4,7 @@ import { useSearchParams } from 'next/navigation';
 import { useEffect, useState, Suspense, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Client, Account } from 'appwrite';
+import { account } from '@/lib/appwrite';
 
 type Status = 'verifying' | 'success' | 'error';
 
@@ -25,11 +25,6 @@ function VerifyEmailContent() {
     }
 
     try {
-      const client = new Client()
-        .setEndpoint(process.env.NEXT_PUBLIC_APPWRITE_ENDPOINT || 'https://nyc.cloud.appwrite.io/v1')
-        .setProject(process.env.NEXT_PUBLIC_APPWRITE_PROJECT_ID || '68e5da9800045446cea7');
-      const account = new Account(client);
-
       await account.updateVerification(userId, secret);
       setStatus('success');
 

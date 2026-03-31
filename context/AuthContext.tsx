@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { account } from '@/lib/appwrite';
 import { Models } from 'appwrite';
+import { mapAuthError } from '@/lib/validation';
 
 interface AuthContextType {
   user: Models.User<Models.Preferences> | null;
@@ -36,17 +37,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const login = async (email: string, password: string) => {
-    await account.createEmailPasswordSession(email, password);
-    await checkUser();
+    try {
+      await account.createEmailPasswordSession(email, password);
+      await checkUser();
+    } catch (err) {
+      throw new Error(mapAuthError(err));
+    }
   };
 
   const signup = async (email: string, password: string, name: string) => {
-    await account.create('unique()', email, password, name);
-    await login(email, password);
+    try {
+      await account.create('unique()', email, password, name);
+      await login(email, password);
+    } catch (err) {
+      throw new Error(mapAuthError(err));
+    }
   };
 
   const logout = async () => {
-    await account.deleteSession('current');
+    try {
+      await account.deleteSession('current');
+    } catch {
+      // Session may already be expired — clear local state regardless
+    }
     setUser(null);
   };
 

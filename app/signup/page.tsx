@@ -1,49 +1,116 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { GoogleReCaptchaProvider, useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import {
+  validateName,
+  validateEmail,
+  validatePassword,
+  sanitizeName,
+  checkRateLimit,
+  recordFailedAttempt,
+  resetRateLimit,
+} from '@/lib/validation';
 
-export default function SignupPage() {
+const RATE_LIMIT_KEY = 'signup';
+const RECAPTCHA_SITE_KEY = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY || '';
+
+function SignupForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   const { signup } = useAuth();
   const router = useRouter();
+  const { executeRecaptcha } = useGoogleReCaptcha();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Countdown timer for rate limit lockout
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    // Validation
+    // Client-side rate limit check
+    const rl = checkRateLimit(RATE_LIMIT_KEY);
+    if (rl.blocked) {
+      setCooldown(rl.remainingSeconds);
+      setError(`Too many attempts. Please wait ${rl.remainingSeconds} seconds.`);
+      return;
+    }
+
+    // Validate all inputs
+    const cleanName = sanitizeName(name);
+    const nameError = validateName(cleanName);
+    if (nameError) { setError(nameError); return; }
+
+    const emailError = validateEmail(email);
+    if (emailError) { setError(emailError); return; }
+
+    const passwordError = validatePassword(password);
+    if (passwordError) { setError(passwordError); return; }
+
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
 
-    if (password.length < 8) {
-      setError('Password must be at least 8 characters long.');
-      return;
+    // reCAPTCHA verification
+    if (RECAPTCHA_SITE_KEY && executeRecaptcha) {
+      try {
+        const token = await executeRecaptcha('signup');
+        if (!token) {
+          setError('CAPTCHA verification failed. Please try again.');
+          return;
+        }
+        // Token is generated — server-side validation can be added later
+        // via an API route that calls Google's siteverify endpoint.
+        // For now the invisible challenge provides bot deterrence.
+      } catch {
+        setError('CAPTCHA verification failed. Please try again.');
+        return;
+      }
     }
 
     setLoading(true);
 
     try {
-      await signup(email, password, name);
+      await signup(email, password, cleanName);
+      resetRateLimit(RATE_LIMIT_KEY);
       router.push('/account');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Unable to create account. Please try again.';
-      setError(errorMessage);
+      recordFailedAttempt(RATE_LIMIT_KEY);
+      const rlAfter = checkRateLimit(RATE_LIMIT_KEY);
+      if (rlAfter.blocked) {
+        setCooldown(rlAfter.remainingSeconds);
+      }
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [name, email, password, confirmPassword, signup, router, executeRecaptcha]);
+
+  const isDisabled = loading || cooldown > 0;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
@@ -88,6 +155,8 @@ export default function SignupPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 required
+                maxLength={100}
+                autoComplete="name"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="John Doe"
               />
@@ -103,6 +172,7 @@ export default function SignupPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="you@example.com"
               />
@@ -118,6 +188,7 @@ export default function SignupPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="new-password"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="••••••••"
               />
@@ -134,6 +205,7 @@ export default function SignupPage() {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
+                autoComplete="new-password"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="••••••••"
               />
@@ -141,7 +213,7 @@ export default function SignupPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isDisabled}
               className="w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-primary/25"
             >
               {loading ? (
@@ -152,6 +224,8 @@ export default function SignupPage() {
                   </svg>
                   Creating account...
                 </span>
+              ) : cooldown > 0 ? (
+                `Try again in ${cooldown}s`
               ) : (
                 'Create Account'
               )}
@@ -180,4 +254,17 @@ export default function SignupPage() {
       </div>
     </div>
   );
+}
+
+export default function SignupPage() {
+  // Wrap in reCAPTCHA provider only if site key is configured
+  if (RECAPTCHA_SITE_KEY) {
+    return (
+      <GoogleReCaptchaProvider reCaptchaKey={RECAPTCHA_SITE_KEY}>
+        <SignupForm />
+      </GoogleReCaptchaProvider>
+    );
+  }
+
+  return <SignupForm />;
 }

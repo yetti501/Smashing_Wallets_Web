@@ -1,10 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import { validateEmail, checkRateLimit, recordFailedAttempt, resetRateLimit } from '@/lib/validation';
+
+const RATE_LIMIT_KEY = 'login';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -12,25 +15,69 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [cooldown, setCooldown] = useState(0);
 
   const { login } = useAuth();
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  // Countdown timer for rate limit lockout
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const timer = setInterval(() => {
+      setCooldown((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [cooldown]);
+
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+
+    // Client-side rate limit check
+    const rl = checkRateLimit(RATE_LIMIT_KEY);
+    if (rl.blocked) {
+      setCooldown(rl.remainingSeconds);
+      setError(`Too many failed attempts. Please wait ${rl.remainingSeconds} seconds.`);
+      return;
+    }
+
+    // Validate email format
+    const emailError = validateEmail(email);
+    if (emailError) {
+      setError(emailError);
+      return;
+    }
+
+    if (!password) {
+      setError('Password is required.');
+      return;
+    }
+
     setLoading(true);
 
     try {
       await login(email, password);
+      resetRateLimit(RATE_LIMIT_KEY);
       router.push('/account');
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'Invalid email or password. Please try again.';
-      setError(errorMessage);
+      recordFailedAttempt(RATE_LIMIT_KEY);
+      const rlAfter = checkRateLimit(RATE_LIMIT_KEY);
+      if (rlAfter.blocked) {
+        setCooldown(rlAfter.remainingSeconds);
+      }
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [email, password, login, router]);
+
+  const isDisabled = loading || cooldown > 0;
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center px-4 py-12">
@@ -75,6 +122,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                 placeholder="you@example.com"
               />
@@ -91,6 +139,7 @@ export default function LoginPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
+                  autoComplete="current-password"
                   className="w-full px-4 py-3 pr-12 rounded-xl border border-gray-200 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                   placeholder="••••••••"
                 />
@@ -116,7 +165,7 @@ export default function LoginPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={isDisabled}
               className="w-full py-3 px-4 bg-primary hover:bg-primary-dark text-white font-semibold rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg hover:shadow-primary/25"
             >
               {loading ? (
@@ -127,6 +176,8 @@ export default function LoginPage() {
                   </svg>
                   Logging in...
                 </span>
+              ) : cooldown > 0 ? (
+                `Try again in ${cooldown}s`
               ) : (
                 'Log In'
               )}
