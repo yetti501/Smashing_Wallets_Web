@@ -49,6 +49,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await account.create('unique()', email, password, name);
       await login(email, password);
+      // Send verification email after signup
+      try {
+        await account.createVerification(`${window.location.origin}/verify-email`);
+      } catch {
+        // Non-blocking — don't fail signup if verification email fails
+      }
     } catch (err) {
       throw new Error(mapAuthError(err));
     }
