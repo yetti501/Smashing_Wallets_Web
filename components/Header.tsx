@@ -18,7 +18,7 @@ export default function Header() {
               alt="Smashing Wallets"
               width={40}
               height={40}
-              className="transition-transform group-hover:scale-105"
+              className="rounded-lg transition-transform group-hover:scale-105"
             />
             <span className="font-display font-bold text-xl text-navy hidden sm:block">
               Smashing Wallets
