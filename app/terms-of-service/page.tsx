@@ -16,7 +16,7 @@ export default function TermsOfServicePage() {
           />
         </Link>
         <h1 className="text-3xl sm:text-4xl font-bold text-navy">Terms of Service</h1>
-        <p className="text-gray-400 mt-2">Last Updated: November 29, 2025</p>
+        <p className="text-gray-400 mt-2">Last Updated: April 16, 2026</p>
       </section>
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16">
@@ -50,7 +50,7 @@ export default function TermsOfServicePage() {
               <li>Notify us immediately of any unauthorized use</li>
             </ul>
             <p className="text-gray-600 leading-relaxed text-sm mt-3">
-              You must be at least 13 years old to create an account. If you are under 18, you represent that you have parental consent.
+              You must be at least 18 years old to create an account and use this App.
             </p>
           </div>
 

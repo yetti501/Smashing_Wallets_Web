@@ -26,6 +26,8 @@ function SignupForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [termsError, setTermsError] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [cooldown, setCooldown] = useState(0);
@@ -52,6 +54,7 @@ function SignupForm() {
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
+    setTermsError('');
 
     // Client-side rate limit check
     const rl = checkRateLimit(RATE_LIMIT_KEY);
@@ -74,6 +77,11 @@ function SignupForm() {
 
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
+      return;
+    }
+
+    if (!agreedToTerms) {
+      setTermsError('You must agree to the terms to create an account');
       return;
     }
 
@@ -110,7 +118,7 @@ function SignupForm() {
     } finally {
       setLoading(false);
     }
-  }, [name, email, password, confirmPassword, signup, router, executeRecaptcha]);
+  }, [name, email, password, confirmPassword, agreedToTerms, signup, router, executeRecaptcha]);
 
   const isDisabled = loading || cooldown > 0;
 
@@ -251,6 +259,34 @@ function SignupForm() {
               </div>
             </div>
 
+            <div>
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => {
+                    setAgreedToTerms(e.target.checked);
+                    if (e.target.checked) setTermsError('');
+                  }}
+                  disabled={isDisabled}
+                  className="mt-0.5 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary/20 cursor-pointer disabled:cursor-not-allowed"
+                />
+                <span className="text-sm text-gray-600">
+                  I am 18 years or older and agree to the{' '}
+                  <Link href="/terms-of-service" className="text-primary hover:text-primary-dark">
+                    Terms of Service
+                  </Link>{' '}
+                  and{' '}
+                  <Link href="/privacy-policy" className="text-primary hover:text-primary-dark">
+                    Privacy Policy
+                  </Link>
+                </span>
+              </label>
+              {termsError && (
+                <p className="text-red-500 text-xs mt-1.5 ml-7">{termsError}</p>
+              )}
+            </div>
+
             <button
               type="submit"
               disabled={isDisabled}
@@ -270,17 +306,6 @@ function SignupForm() {
                 'Create Account'
               )}
             </button>
-
-            <p className="text-xs text-gray-400 text-center">
-              By creating an account, you agree to our{' '}
-              <Link href="/terms-of-service" className="text-primary hover:text-primary-dark">
-                Terms of Service
-              </Link>{' '}
-              and{' '}
-              <Link href="/privacy-policy" className="text-primary hover:text-primary-dark">
-                Privacy Policy
-              </Link>
-            </p>
           </form>
         </div>
 

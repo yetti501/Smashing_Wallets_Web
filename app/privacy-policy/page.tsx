@@ -16,7 +16,7 @@ export default function PrivacyPolicyPage() {
           />
         </Link>
         <h1 className="text-3xl sm:text-4xl font-bold text-navy">Privacy Policy</h1>
-        <p className="text-gray-400 mt-2">Last Updated: November 29, 2025</p>
+        <p className="text-gray-400 mt-2">Last Updated: April 16, 2026</p>
       </section>
 
       <section className="max-w-3xl mx-auto px-4 sm:px-6 pb-16">
@@ -155,11 +155,97 @@ export default function PrivacyPolicyPage() {
             </p>
           </div>
 
+          {/* California Privacy Rights (CCPA) */}
+          <div>
+            <h2 className="text-xl font-semibold text-navy mb-5">California Privacy Rights (CCPA)</h2>
+            <p className="text-gray-600 leading-relaxed text-sm mb-4">
+              If you are a California resident, the California Consumer Privacy Act (CCPA) provides you with specific rights regarding your personal information.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">Your Rights</h3>
+                <ul className="list-disc list-inside text-gray-600 text-sm space-y-1.5 ml-1">
+                  <li><span className="font-medium text-navy">Right to Know</span> &mdash; You can request details about what personal information we collect, the sources, the purpose of collection, and any third parties with whom we share it</li>
+                  <li><span className="font-medium text-navy">Right to Delete</span> &mdash; You can delete your personal data via in-app Settings &rarr; Delete Account, or by emailing <a href="mailto:support@smashingwallets.com" className="text-primary hover:underline">support@smashingwallets.com</a></li>
+                  <li><span className="font-medium text-navy">Right to Opt-Out of Sale</span> &mdash; We do NOT sell your personal data. No opt-out is necessary</li>
+                  <li><span className="font-medium text-navy">Right to Non-Discrimination</span> &mdash; We will not discriminate against you for exercising any of your CCPA rights</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">Categories of Personal Information Collected</h3>
+                <ul className="list-disc list-inside text-gray-600 text-sm space-y-1.5 ml-1">
+                  <li><span className="font-medium text-navy">Identifiers</span> &mdash; Name, email address, phone number (optional), account ID</li>
+                  <li><span className="font-medium text-navy">Geolocation data</span> &mdash; Approximate device location (only with your permission)</li>
+                  <li><span className="font-medium text-navy">User-generated content</span> &mdash; Event listings, photos, descriptions</li>
+                  <li><span className="font-medium text-navy">Internet activity</span> &mdash; Saved events, app preferences</li>
+                </ul>
+                <p className="text-gray-600 text-sm mt-3">
+                  We do NOT collect sensitive personal information such as Social Security numbers, financial account details, or biometric data.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">Response Commitment</h3>
+                <p className="text-gray-600 text-sm">
+                  We will respond to verifiable consumer requests within 45 days.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* European Privacy Rights (GDPR) */}
+          <div>
+            <h2 className="text-xl font-semibold text-navy mb-5">European Privacy Rights (GDPR)</h2>
+            <p className="text-gray-600 leading-relaxed text-sm mb-4">
+              If you are located in the European Economic Area (EEA), the United Kingdom, or Switzerland, the General Data Protection Regulation (GDPR) provides you with certain rights regarding your personal data.
+            </p>
+
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">Your Rights</h3>
+                <ul className="list-disc list-inside text-gray-600 text-sm space-y-1.5 ml-1">
+                  <li><span className="font-medium text-navy">Right of Access</span> &mdash; Request a copy of your personal data</li>
+                  <li><span className="font-medium text-navy">Right to Rectification</span> &mdash; Request correction of inaccurate data, or update it directly in the app</li>
+                  <li><span className="font-medium text-navy">Right to Erasure</span> &mdash; Request deletion of your data via the Delete Account feature or by emailing <a href="mailto:support@smashingwallets.com" className="text-primary hover:underline">support@smashingwallets.com</a></li>
+                  <li><span className="font-medium text-navy">Right to Restrict Processing</span> &mdash; Limit how we use your data in certain circumstances</li>
+                  <li><span className="font-medium text-navy">Right to Data Portability</span> &mdash; Request your data in a structured, machine-readable format</li>
+                  <li><span className="font-medium text-navy">Right to Object</span> &mdash; Object to the processing of your data in certain circumstances</li>
+                  <li><span className="font-medium text-navy">Right to Withdraw Consent</span> &mdash; For example, revoking location permission in your device settings</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">Legal Basis for Processing</h3>
+                <ul className="list-disc list-inside text-gray-600 text-sm space-y-1.5 ml-1">
+                  <li><span className="font-medium text-navy">Contract performance</span> &mdash; Account management and event listings</li>
+                  <li><span className="font-medium text-navy">Consent</span> &mdash; Location data and photos</li>
+                  <li><span className="font-medium text-navy">Legitimate interests</span> &mdash; Security and service improvement</li>
+                </ul>
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">International Data Transfers</h3>
+                <p className="text-gray-600 text-sm">
+                  Your data may be transferred to and processed in the United States. We ensure that appropriate safeguards are in place to protect your data in accordance with applicable law.
+                </p>
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-navy mb-2">Response Commitment &amp; Complaints</h3>
+                <p className="text-gray-600 text-sm">
+                  We will respond to your requests within 30 days. You also have the right to lodge a complaint with your local data protection authority. For all requests, contact us at <a href="mailto:support@smashingwallets.com" className="text-primary hover:underline">support@smashingwallets.com</a>.
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Children's Privacy */}
           <div>
             <h2 className="text-xl font-semibold text-navy mb-3">Children&apos;s Privacy</h2>
             <p className="text-gray-600 leading-relaxed text-sm">
-              Smashing Wallets is not intended for children under 13 years of age. We do not knowingly collect personal information from children under 13. If you believe we have collected data from a child under 13, please contact us immediately.
+              Smashing Wallets is intended for users who are 18 years of age or older. We do not knowingly collect personal information from anyone under 18. If you believe we have collected data from someone under 18, please contact us immediately and we will promptly delete that information.
             </p>
           </div>
 
