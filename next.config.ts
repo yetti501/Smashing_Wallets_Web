@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
 };
 
 export default withSentryConfig(nextConfig, {
-  org: "smashing-wallets",
+  org: "smashing-wallets-web",
   project: "javascript-nextjs",
   silent: !process.env.CI,
   widenClientFileUpload: true,
