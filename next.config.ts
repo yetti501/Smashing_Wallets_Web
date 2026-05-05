@@ -1,5 +1,4 @@
 import type { NextConfig } from "next";
-import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -39,7 +38,7 @@ const nextConfig: NextConfig = {
               "style-src 'self' 'unsafe-inline'",
               "img-src 'self' data: https:",
               "font-src 'self' https://fonts.gstatic.com",
-              "connect-src 'self' https://nyc.cloud.appwrite.io https://cloud.appwrite.io https://www.google.com https://*.google-analytics.com https://*.googletagmanager.com https://*.ingest.sentry.io https://*.ingest.us.sentry.io",
+              "connect-src 'self' https://nyc.cloud.appwrite.io https://cloud.appwrite.io https://www.google.com https://*.google-analytics.com https://*.googletagmanager.com",
               "frame-src https://www.google.com https://www.gstatic.com",
               "worker-src 'self' blob:",
               "base-uri 'self'",
@@ -52,12 +51,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: "smashing-wallets-web",
-  project: "javascript-nextjs",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  sourcemaps: {
-    deleteSourcemapsAfterUpload: true,
-  },
-});
+export default nextConfig;
