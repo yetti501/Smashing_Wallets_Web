@@ -19,6 +19,9 @@ if (apiKey && (typeof Bugsnag.isStarted !== 'function' || !Bugsnag.isStarted()))
       enabledReleaseStages: ['production', 'preview', 'development'],
     });
     console.log('[Bugsnag init] client started successfully');
+    if (typeof window !== 'undefined') {
+      (window as unknown as { Bugsnag: typeof Bugsnag }).Bugsnag = Bugsnag;
+    }
   } catch (err) {
     console.error('[Bugsnag init] client start failed', err);
   }
