@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { Outfit } from "next/font/google";
+import { Outfit, Geist } from "next/font/google";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 import Header from "@/components/Header";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const outfit = Outfit({
   subsets: ["latin"],
@@ -24,7 +27,7 @@ export default function RootLayout({
   const gaId = process.env.NEXT_PUBLIC_GA_ID;
 
   return (
-    <html lang="en">
+    <html lang="en" className={cn("font-sans", geist.variable)}>
       <body className={`${outfit.variable} font-sans antialiased bg-background text-navy`}>
         <AuthProvider>
           <Header />

@@ -5,6 +5,7 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_RELEASE_STAGE:
       process.env.VERCEL_ENV ||
       (process.env.NODE_ENV === 'production' ? 'production' : 'development'),
+    NEXT_PUBLIC_MASTER_ADMIN_EMAIL: process.env.MASTER_ADMIN_EMAIL || '',
   },
   async headers() {
     return [

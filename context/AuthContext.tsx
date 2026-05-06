@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState, ReactNode } from 'react';
 import { account } from '@/lib/appwrite';
 import { Models } from 'appwrite';
 import { mapAuthError } from '@/lib/validation';
@@ -20,12 +20,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<Models.User<Models.Preferences> | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing session on mount
-  useEffect(() => {
-    checkUser();
-  }, []);
-
-  const checkUser = async () => {
+  const checkUser = useCallback(async () => {
     try {
       const currentUser = await account.get();
       setUser(currentUser);
@@ -34,7 +29,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Check for existing session on mount
+  useEffect(() => {
+    checkUser();
+  }, [checkUser]);
 
   const login = async (email: string, password: string) => {
     try {
@@ -69,9 +69,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null);
   };
 
-  const refreshUser = async () => {
+  const refreshUser = useCallback(async () => {
     await checkUser();
-  };
+  }, [checkUser]);
 
   return (
     <AuthContext.Provider value={{ user, loading, login, signup, logout, refreshUser }}>
